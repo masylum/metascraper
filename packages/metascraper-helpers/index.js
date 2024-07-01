@@ -26,6 +26,7 @@ const METASCRAPER_RE2 = process.env.METASCRAPER_RE2
 const urlRegexForTest = require('url-regex-safe')({
   exact: true,
   parens: true,
+  apostophres: true,
   re2: METASCRAPER_RE2
 })
 
