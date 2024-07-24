@@ -4,7 +4,6 @@ const memoizeOne = require('memoize-one').default || require('memoize-one')
 const condenseWhitespace = require('condense-whitespace')
 const { getExtension: mimeExtension } = require('mime')
 const capitalize = require('microsoft-capitalize')
-const { JSDOM, VirtualConsole } = require('jsdom')
 const isRelativeUrl = require('is-relative-url')
 const fileExtension = require('file-extension')
 const _normalizeUrl = require('normalize-url')
@@ -13,6 +12,7 @@ const { decodeHTML } = require('entities')
 const iso6393 = require('iso-639-3/to-1')
 const dataUri = require('data-uri-utils')
 const hasValues = require('has-values')
+
 const chrono = require('chrono-node')
 const isIso = require('isostring')
 const isUri = require('is-uri')
@@ -26,11 +26,11 @@ const METASCRAPER_RE2 = process.env.METASCRAPER_RE2
 const urlRegexForTest = require('url-regex-safe')({
   exact: true,
   parens: true,
-  re2: METASCRAPER_RE2
+  re2: METASCRAPER_RE2,
 })
 
 const urlRegexForMatch = require('url-regex-safe')({
-  re2: METASCRAPER_RE2
+  re2: METASCRAPER_RE2,
 })
 
 const {
@@ -48,14 +48,14 @@ const {
   replace,
   size,
   toLower,
-  toString
+  toString,
 } = require('lodash')
 
 const iso6393Values = Object.values(iso6393)
 
 const parseUrl = memoize(tldts.parse)
 
-const toTitle = str =>
+const toTitle = (str) =>
   capitalize(str, [
     'CLI',
     'API',
@@ -76,7 +76,7 @@ const toTitle = str =>
     'HTML',
     'WordPress',
     'JavaScript',
-    'Node.js'
+    'Node.js',
   ])
 
 const VIDEO = 'video'
@@ -112,7 +112,7 @@ const EXTENSIONS = {
   ...imageExtensions,
   ...audioExtensions,
   ...videoExtensions,
-  [PDF]: PDF
+  [PDF]: PDF,
 }
 
 const REGEX_BY = /^[\s\n]*by[\s\n]+|@[\s\n]*/i
@@ -123,7 +123,7 @@ const REGEX_TITLE_SEPARATOR = /^[^|\-/•—]+/
 
 const AUTHOR_MAX_LENGTH = 128
 
-const removeLocation = value => replace(value, REGEX_LOCATION, '')
+const removeLocation = (value) => replace(value, REGEX_LOCATION, '')
 
 const isUrl = (url, { relative = false } = {}) =>
   relative ? isRelativeUrl(url) : urlRegexForTest.test(url)
@@ -147,7 +147,7 @@ const sanetizeUrl = (url, opts) =>
     sortQueryParameters: false,
     removeSingleSlash: false,
     removeTrailingSlash: false,
-    ...opts
+    ...opts,
   })
 
 const normalizeUrl = (baseUrl, relativePath, opts) => {
@@ -157,11 +157,11 @@ const normalizeUrl = (baseUrl, relativePath, opts) => {
 }
 
 const removeBy = flow([
-  value => value.replace(REGEX_BY, ''),
-  condenseWhitespace
+  (value) => value.replace(REGEX_BY, ''),
+  condenseWhitespace,
 ])
 
-const removeSeparator = title =>
+const removeSeparator = (title) =>
   condenseWhitespace((REGEX_TITLE_SEPARATOR.exec(title) || [])[0] || title)
 
 const createTitle = flow([condenseWhitespace, smartquotes])
@@ -193,7 +193,7 @@ const $filter = ($, matchedEl, fn = $filter.fn) => {
   return matched
 }
 
-$filter.fn = el => condenseWhitespace(el.text())
+$filter.fn = (el) => condenseWhitespace(el.text())
 
 const isAuthor = (str, opts = { relative: false }) =>
   !isUrl(str, opts) &&
@@ -204,7 +204,7 @@ const isAuthor = (str, opts = { relative: false }) =>
 const getAuthor = (str, { removeBy = true, ...opts } = {}) =>
   titleize(str, { removeBy, ...opts })
 
-const protocol = url => {
+const protocol = (url) => {
   const { protocol = '' } = urlObject(url)
   return protocol.replace(':', '')
 }
@@ -215,7 +215,7 @@ const isExtension = (url, type, ext = extension(url)) =>
 const isExtensionUrl = (url, type, { ext, ...opts } = {}) =>
   isUrl(url, opts) && isExtension(url, type, ext)
 
-const createIsUrl = type => (url, opts) => isExtensionUrl(url, type, opts)
+const createIsUrl = (type) => (url, opts) => isExtensionUrl(url, type, opts)
 
 const isVideoUrl = createIsUrl(VIDEO)
 
@@ -230,10 +230,10 @@ const isMediaUrl = memoizeOne(
     isImageUrl(url, opts) || isVideoUrl(url, opts) || isAudioUrl(url, opts)
 )
 
-const isMediaExtension = url =>
+const isMediaExtension = (url) =>
   isImageExtension(url) || isVideoExtension(url) || isAudioExtension(url)
 
-const createIsExtension = type => url => isExtension(url, type)
+const createIsExtension = (type) => (url) => isExtension(url, type)
 
 const isVideoExtension = createIsExtension(VIDEO)
 
@@ -244,9 +244,9 @@ const isImageExtension = createIsExtension(IMAGE)
 const isPdfExtension = createIsExtension(PDF)
 
 const isContentType =
-  extensions =>
-    ({ type = '' } = {}) =>
-      extensions.some(extension => type.endsWith(extension))
+  (extensions) =>
+  ({ type = '' } = {}) =>
+    extensions.some((extension) => type.endsWith(extension))
 
 const isVideoContentType = isContentType(Object.keys(videoExtensions))
 
@@ -275,7 +275,7 @@ const getDescription = (
   return titleize(description, opts).replace(/\s?\.\.\.?$/, ellipsis)
 }
 
-const publisher = value =>
+const publisher = (value) =>
   isString(value) ? condenseWhitespace(value) : undefined
 
 const author = (value, opts) =>
@@ -292,10 +292,10 @@ const url = (value, { url = '' } = {}) => {
   return isUri(value) ? value : undefined
 }
 
-const getISODate = date =>
+const getISODate = (date) =>
   date && !Number.isNaN(date.getTime()) ? date.toISOString() : undefined
 
-const date = value => {
+const date = (value) => {
   if (isDate(value)) return value.toISOString()
   if (!(isString(value) || isNumber(value))) return
 
@@ -332,7 +332,7 @@ const date = value => {
   return isoDate
 }
 
-const lang = input => {
+const lang = (input) => {
   if (isEmpty(input) || !isString(input)) return
   const key = toLower(condenseWhitespace(input))
   if (input.length === 3) return iso6393[key]
@@ -350,7 +350,7 @@ memoizeOne.EqualityUrlAndHtmlDom = (newArgs, oldArgs) =>
   newArgs[0] === oldArgs[0] && newArgs[1].html() === oldArgs[1].html()
 
 const jsonld = memoizeOne(
-  $ =>
+  ($) =>
     $('script[type="application/ld+json"]')
       .map((_, element) => {
         try {
@@ -358,7 +358,7 @@ const jsonld = memoizeOne(
           const json = JSON.parse($(el).contents().text())
           const { '@graph': graph, ...props } = json
           if (!graph) return json
-          return graph.map(item => ({ ...props, ...item }))
+          return graph.map((item) => ({ ...props, ...item }))
         } catch (_) {
           return undefined
         }
@@ -368,11 +368,11 @@ const jsonld = memoizeOne(
   (newArgs, oldArgs) => newArgs[0].html() === oldArgs[0].html()
 )
 
-const $jsonld = propName => $ => {
+const $jsonld = (propName) => ($) => {
   const collection = jsonld($)
   let value
 
-  collection.find(item => {
+  collection.find((item) => {
     value = get(item, propName)
     return !isEmpty(value) || isNumber(value) || isBoolean(value)
   })
@@ -419,7 +419,7 @@ const validator = {
   publisher,
   title,
   url,
-  video
+  video,
 }
 
 const truthyTest = () => true
@@ -439,59 +439,25 @@ const findRule = async (rules, args) => {
 
 const toRule =
   (mapper, opts) =>
-    rule =>
-      async ({ htmlDom, url }) => {
-        const value = await rule(htmlDom, url)
-        return mapper(value, { url, ...opts })
-      }
+  (rule) =>
+  async ({ htmlDom, url }) => {
+    const value = await rule(htmlDom, url)
+    return mapper(value, { url, ...opts })
+  }
 
 const composeRule =
-  rule =>
-    ({ from, to = from, ...opts }) =>
-      async ({ htmlDom, url }) => {
-        const data = await rule(htmlDom, url)
-        const value = get(data, from)
-        return invoke(validator, to, value, { url, ...opts })
-      }
+  (rule) =>
+  ({ from, to = from, ...opts }) =>
+  async ({ htmlDom, url }) => {
+    const data = await rule(htmlDom, url)
+    const value = get(data, from)
+    return invoke(validator, to, value, { url, ...opts })
+  }
 
-const has = value =>
+const has = (value) =>
   value !== undefined && !Number.isNaN(value) && hasValues(value)
 
-const loadIframe = (url, $, { timeout = 5000 } = {}) =>
-  new Promise(resolve => {
-    const dom = new JSDOM($.html(), {
-      url,
-      virtualConsole: new VirtualConsole(),
-      runScripts: 'dangerously',
-      resources: 'usable'
-    })
-
-    const done = (html = '') => resolve($.load(html))
-
-    const listen = (element, method, fn) =>
-      element[`${method}EventListener`]('load', fn, {
-        capture: true,
-        once: true,
-        passive: true
-      })
-
-    const iframe = dom.window.document.querySelector('iframe')
-    if (!iframe) return done()
-
-    const timer = setTimeout(() => {
-      listen(iframe, 'remove', load)
-      done()
-    }, timeout)
-
-    function load () {
-      clearTimeout(timer)
-      done(iframe.contentDocument.documentElement.outerHTML)
-    }
-
-    listen(iframe, 'add', load)
-  })
-
-const getUrls = input => String(input).match(urlRegexForMatch) ?? []
+const getUrls = (input) => String(input).match(urlRegexForMatch) ?? []
 
 module.exports = {
   $filter,
@@ -527,7 +493,6 @@ module.exports = {
   isVideoUrl,
   jsonld,
   lang,
-  loadIframe,
   logo,
   memoizeOne,
   mimeExtension,
@@ -542,5 +507,5 @@ module.exports = {
   url,
   validator,
   video,
-  videoExtensions
+  videoExtensions,
 }
